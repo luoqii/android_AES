@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file:///mnt/workbench/AndroidAES/AndroidAES.iml" filepath="/mnt/workbench/AndroidAES/AndroidAES.iml" />
+      <module fileurl="file:///mnt/workbench/AndroidAES/app/app.iml" filepath="/mnt/workbench/AndroidAES/app/app.iml" />
+    </modules>
+  </component>
+</project>
