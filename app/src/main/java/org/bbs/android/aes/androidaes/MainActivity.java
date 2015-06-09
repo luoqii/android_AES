@@ -2,6 +2,7 @@ package org.bbs.android.aes.androidaes;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,6 +55,7 @@ public class MainActivity extends ActionBarActivity {
 
 
     // http://www.cnblogs.com/carlosk/archive/2012/05/18/2507975.html
+    //http://aes.online-domain-tools.com/
     public static class MyCipher {
 
         private static final String UTF_8 = "utf-8";
@@ -64,8 +66,9 @@ public class MainActivity extends ActionBarActivity {
         protected String mSeed;
 
         public MyCipher() {
-            mSeed = "qwer3as2jin4fdsa";
-            mClearText = "1234567890";
+            mSeed =      "qwer3as2jin4fdsa";
+            mClearText = "0123456789abcdef";
+            mClearText = "123456789       ";
             mBase64CipheredText = "wF7sjX9ON7UTWBBtzpU2iA==";
 
         }
@@ -73,19 +76,29 @@ public class MainActivity extends ActionBarActivity {
         public void doit() throws Exception {
             byte[] originalData = mClearText.getBytes(UTF_8);
             byte[] encryptedData = encrypt(getRawKey(mSeed.getBytes(UTF_8)), originalData);
+
+//            String b64 = new String(Base64.encode(encryptedData, 0));
+//            Log.d(TAG, "after  base64: " + b64);
+//            encryptedData = Base64.decode(b64.getBytes(), 0);
+
             byte[] decryptedData = decrypt(getRawKey(mSeed.getBytes(UTF_8)), encryptedData);
 
-            Log.d(TAG, "originalData: " + toHex(originalData));
-            Log.d(TAG, "encryptedData: " + toHex(encryptedData));
-            Log.d(TAG, "decryptedData: " + toHex(decryptedData));
+            Log.d(TAG, "clean data        : " + mClearText);
+            Log.d(TAG, "originalDataBytes : " + toHex(originalData));
+            Log.d(TAG, "encryptedData     : " + toHex(encryptedData));
+            Log.d(TAG, "decryptedDataBytes: " + toHex(decryptedData));
+            Log.d(TAG, "original data     : " + new String(decryptedData, UTF_8));
         }
 
         private static byte[] encrypt(byte[] key, byte[] clear) throws Exception {
             SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
 //        Cipher cipher = Cipher.getInstance("AES");
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, new IvParameterSpec(
-                    new byte[cipher.getBlockSize()]));
+            //http://blog.sina.com.cn/s/blog_671d2e4f0101jvh2.html
+            Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
+//            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, new IvParameterSpec(
+//                    new byte[cipher.getBlockSize()]));
+            cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
+            dumpCipher(cipher, "encytpt:");
             byte[] encrypted = cipher.doFinal(clear);
 
             return encrypted;
@@ -95,9 +108,11 @@ public class MainActivity extends ActionBarActivity {
                 throws Exception {
             SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
 //        Cipher cipher = Cipher.getInstance("AES");
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.DECRYPT_MODE, skeySpec, new IvParameterSpec(
-                    new byte[cipher.getBlockSize()]));
+            Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
+//            cipher.init(Cipher.DECRYPT_MODE, skeySpec, new IvParameterSpec(
+//                    new byte[cipher.getBlockSize()]));
+            cipher.init(Cipher.DECRYPT_MODE, skeySpec);
+            dumpCipher(cipher, "decytpt:");
             byte[] decrypted = cipher.doFinal(encrypted);
             return decrypted;
         }
@@ -116,7 +131,18 @@ public class MainActivity extends ActionBarActivity {
             SecretKey sKey = kgen.generateKey();
             byte[] raw = sKey.getEncoded();
 
-            return raw;
+//            return raw;
+            return seed;
+        }
+
+
+        static void dumpCipher(Cipher c, String prefix){
+            Log.d(TAG, "" + prefix);
+            Log.d(TAG, "algorithm: " + c.getAlgorithm());
+            Log.d(TAG, "blocksize: " + c.getBlockSize());
+            Log.d(TAG, "iv: " + c.getIV());
+            Log.d(TAG, "parameters: " + c.getParameters());
+            Log.d(TAG, "provider: " + c.getProvider());
         }
 
         public static String toHex(String txt) {
